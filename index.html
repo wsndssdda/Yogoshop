@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Carousel</title>
     <style>
+        :root {
+            --bg-color: #f0f0f0; /* 淡灰色背景 */
+        }
         body, html {
             margin: 0;
             padding: 0;
             overflow: hidden;
-            background-color: #f0f0f0; /* 淡灰色背景 */
+            background-color: var(--bg-color);
         }
-
         .slider {
             display: flex;
             overflow-x: scroll; /* 更自然的滑动体验 */
@@ -19,10 +21,9 @@
             width: 100%;
             height: 100vh;
         }
-
         .slider img {
             width: 100vw; /* 适应视口宽度 */
-            max-height: 100vh; /* 确保图片高度不超过视口高度，但允许用户滑动查看被遮挡的部分 */
+            max-height: 100vh; /* 确保图片高度不超过视口高度 */
             object-fit: contain; /* 保证图片完整显示而不裁剪 */
         }
     </style>
@@ -58,7 +59,7 @@
             if (!isDown) return;
             e.preventDefault();
             const x = e.pageX || e.touches[0].pageX - slider.offsetLeft;
-            const walk = (x - startX); // 减少乘数以使滑动更平滑
+            const walk = (x - startX);
             slider.scrollLeft = scrollLeft - walk;
         }
 
@@ -75,4 +76,5 @@
 </script>
 </body>
 </html>
+
 
