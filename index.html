@@ -28,15 +28,27 @@
         }
     </style>
 </head>
-<body>
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
 
-<div class="slider" id="slider">
-    <img src="image1.jpg" alt="Image 1">
-    <img src="image2.jpg" alt="Image 2">
-    <img src="image3.jpg" alt="Image 3">
-    <img src="image4.jpg" alt="Image 4">
-    <img src="image5.jpg" alt="Image 5">
-</div>
+.slider {
+    display: flex;
+    overflow-x: scroll; /* 允许水平滚动 */
+    width: 100vw;
+    height: 100vh;
+    scroll-snap-type: x mandatory;
+}
+
+.slider img {
+    /* 移除object-fit属性，以避免图片被裁剪 */
+    min-width: 100%; /* 确保图片至少和视口一样宽 */
+    height: auto; /* 保持图片原有比例 */
+    scroll-snap-align: start;
+}
+
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
