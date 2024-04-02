@@ -8,21 +8,21 @@
             height: 100%;
             margin: 0;
             overflow: hidden;
-            touch-action: none; /* 禁止浏览器的默认触摸行为，如滚动 */
         }
         #viewer {
-            display: flex; /* 使用flex布局以便图片能够水平排列 */
+            display: flex;
             height: 100%;
-            overflow-x: scroll; /* 允许水平滚动 */
-            scroll-snap-type: x mandatory; /* 启用滚动捕捉以确保图片对齐 */
+            min-width: 100%;
+            overflow: hidden;
         }
         .image {
-            flex: 0 0 auto; /* 防止图片缩放，保持原有尺寸 */
-            width: 100%; /* 宽度和视口一致 */
+            min-width: 150%; /* 假设图片宽度为电脑屏幕宽度的1.5倍 */
             height: 100%;
-            background-size: auto 100%; /* 背景图片高度100%，宽度自动 */
+            background-size: contain;
             background-repeat: no-repeat;
-            scroll-snap-align: start; /* 滚动捕捉对齐 */
+            background-position: center;
+            transition: transform 0.3s ease-out;
+            position: relative;
         }
     </style>
 </head>
@@ -37,50 +37,44 @@
 </div>
 
 <script>
-    // 获取所有图片和视图容器
-    var viewer = document.getElementById('viewer');
-
-    // 滑动开始时的初始位置
-    let isDown = false;
+    const images = document.querySelectorAll('.image');
     let startX;
-    let scrollLeft;
+    let moveX;
+    let currentX = 0;
+    let isDragging = false;
 
-    viewer.addEventListener('mousedown', (e) => {
-        isDown = true;
-        startX = e.pageX - viewer.offsetLeft;
-        scrollLeft = viewer.scrollLeft;
-    });
-    viewer.addEventListener('mouseleave', () => {
-        isDown = false;
-    });
-    viewer.addEventListener('mouseup', () => {
-        isDown = false;
-    });
-    viewer.addEventListener('mousemove', (e) => {
-        if (!isDown) return;
-        e.preventDefault();
-        const x = e.pageX - viewer.offsetLeft;
-        const walk = (x - startX) * 2; // 滑动距离，*2增加滑动敏感度
-        viewer.scrollLeft = scrollLeft - walk;
-    });
+    function onTouchStart(e) {
+        isDragging = true;
+        startX = e.touches[0].clientX;
+    }
 
-    // 触摸事件
-    viewer.addEventListener('touchstart', (e) => {
-        isDown = true;
-        startX = e.touches[0].pageX - viewer.offsetLeft;
-        scrollLeft = viewer.scrollLeft;
-    }, { passive: false });
-    viewer.addEventListener('touchend', () => {
-        isDown = false;
-    });
-    viewer.addEventListener('touchmove', (e) => {
-        if (!isDown) return;
-        e.preventDefault();
-        const x = e.touches[0].pageX - viewer.offsetLeft;
-        const walk = (x - startX) * 2; // 滑动距离，*2增加滑动敏感度
-        viewer.scrollLeft = scrollLeft - walk;
-    }, { passive: false });
+    function onTouchMove(e) {
+        if (!isDragging) return;
+        moveX = e.touches[0].clientX;
+        const moveDistance = moveX - startX;
+        currentX += moveDistance;
+        e.target.style.transform = `translateX(${currentX}px)`;
+        startX = moveX;
+    }
 
+    function onTouchEnd(e) {
+        isDragging = false;
+        // 当滑动超过一定距离时，自动过渡到下一张或上一张图片
+        const threshold = window.innerWidth / 3; // 滑动阈值
+        if (currentX < -threshold && e.target.nextElementSibling) {
+            currentX -= window.innerWidth;
+            e.target.style.transform = `translateX(${currentX}px)`;
+        } else if (currentX > threshold && e.target.previousElementSibling) {
+            currentX += window.innerWidth;
+            e.target.style.transform = `translateX(${currentX}px)`;
+        }
+    }
+
+    images.forEach(image => {
+        image.addEventListener('touchstart', onTouchStart);
+        image.addEventListener('touchmove', onTouchMove);
+        image.addEventListener('touchend', onTouchEnd);
+    });
 </script>
 
 </body>
