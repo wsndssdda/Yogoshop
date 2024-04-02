@@ -13,42 +13,28 @@
 
         .slider {
             display: flex;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-            width: 100vw;
+            overflow-x: scroll; /* 更自然的滑动体验 */
+            -webkit-overflow-scrolling: touch; /* 为iOS设备提供流畅的滚动 */
+            width: 100%;
             height: 100vh;
         }
 
         .slider img {
-            width: 100vw;
-            height: 100vh;
-            object-fit: cover;
-            scroll-snap-align: start;
+            width: 100vw; /* 适应视口宽度 */
+            max-height: 100vh; /* 确保图片高度不超过视口高度，但允许用户滑动查看被遮挡的部分 */
+            object-fit: contain; /* 保证图片完整显示而不裁剪 */
         }
     </style>
 </head>
-body, html {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-}
+<body>
 
-.slider {
-    display: flex;
-    overflow-x: scroll; /* 允许水平滚动 */
-    width: 100vw;
-    height: 100vh;
-    scroll-snap-type: x mandatory;
-}
-
-.slider img {
-    /* 移除object-fit属性，以避免图片被裁剪 */
-    min-width: 100%; /* 确保图片至少和视口一样宽 */
-    height: auto; /* 保持图片原有比例 */
-    scroll-snap-align: start;
-}
-
+<div class="slider" id="slider">
+    <img src="image1.jpg" alt="Image 1">
+    <img src="image2.jpg" alt="Image 2">
+    <img src="image3.jpg" alt="Image 3">
+    <img src="image4.jpg" alt="Image 4">
+    <img src="image5.jpg" alt="Image 5">
+</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -71,7 +57,7 @@ body, html {
             if (!isDown) return;
             e.preventDefault();
             const x = e.pageX || e.touches[0].pageX - slider.offsetLeft;
-            const walk = (x - startX) * 3; // 使滑动更平滑
+            const walk = (x - startX); // 减少乘数以使滑动更平滑
             slider.scrollLeft = scrollLeft - walk;
         }
 
@@ -88,4 +74,5 @@ body, html {
 </script>
 </body>
 </html>
+
 
