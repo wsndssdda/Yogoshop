@@ -4,29 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Carousel</title>
-   <style>
-    body, html {
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-    }
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
 
-    .slider {
-        display: flex;
-        flex-direction: column; /* 改为垂直布局 */
-        overflow-y: auto; /* 允许在垂直方向上滚动 */
-        -webkit-overflow-scrolling: touch; /* 为iOS设备提供流畅的滚动 */
-        width: 100vw;
-        height: 100vh;
-    }
+        .slider {
+            display: flex;
+            overflow-x: scroll; /* 更自然的滑动体验 */
+            -webkit-overflow-scrolling: touch; /* 为iOS设备提供流畅的滚动 */
+            width: 100%;
+            height: 100vh;
+        }
 
-    .slider img {
-        height: auto; /* 自动调整高度以保持图片比例 */
-        max-width: 100%; /* 确保图片宽度不超过视口宽度 */
-        object-fit: contain; /* 保证图片在容器内完整显示 */
-        display: block; /* 避免图片之间的空隙 */
-    }
-</style>
+        .slider img {
+            width: 100vw; /* 适应视口宽度 */
+            max-height: 100vh; /* 确保图片高度不超过视口高度，但允许用户滑动查看被遮挡的部分 */
+            object-fit: contain; /* 保证图片完整显示而不裁剪 */
+        }
+    </style>
 </head>
 <body>
 
@@ -76,5 +74,4 @@
 </script>
 </body>
 </html>
-
 
