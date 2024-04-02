@@ -15,64 +15,82 @@
             display: flex;
             overflow-x: scroll; /* 更自然的滑动体验 */
             -webkit-overflow-scrolling: touch; /* 为iOS设备提供流畅的滚动 */
-            width: 100%;
+            scroll-behavior: smooth; /* 平滑滚动 */
+            width: 100vw;
             height: 100vh;
         }
 
         .slider img {
             width: 100vw; /* 适应视口宽度 */
-            max-height: 100vh; /* 确保图片高度不超过视口高度，但允许用户滑动查看被遮挡的部分 */
+            max-height: 100vh; /* 确保图片高度不超过视口高度 */
             object-fit: contain; /* 保证图片完整显示而不裁剪 */
+            opacity: 0; /* 初始时隐藏图片，直到它们加载完成 */
+            transition: opacity 0.5s ease-out; /* 平滑显示图片 */
         }
     </style>
 </head>
 <body>
 
 <div class="slider" id="slider">
-    <img src="image1.jpg" alt="Image 1">
-    <img src="image2.jpg" alt="Image 2">
-    <img src="image3.jpg" alt="Image 3">
-    <img src="image4.jpg" alt="Image 4">
-    <img src="image5.jpg" alt="Image 5">
+    <!-- 使用data-src代替src属性实现懒加载 -->
+    <img data-src="image1.jpg" alt="Image 1">
+    <img data-src="image2.jpg" alt="Image 2">
+    <img data-src="image3.jpg" alt="Image 3">
+    <img data-src="image4.jpg" alt="Image 4">
+    <img data-src="image5.jpg" alt="Image 5">
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const slider = document.getElementById('slider');
-        let isDown = false;
-        let startX;
-        let scrollLeft;
+document.addEventListener('DOMContentLoaded', function() {
+    const slider = document.getElementById('slider');
+    let isDown = false;
+    let startX;
+    let scrollLeft;
 
-        function startDrag(e) {
-            isDown = true;
-            startX = e.pageX || e.touches[0].pageX - slider.offsetLeft;
-            scrollLeft = slider.scrollLeft;
-        }
+    function loadImages() {
+        const imgs = slider.querySelectorAll('img[data-src]');
+        const sliderRect = slider.getBoundingClientRect();
+        imgs.forEach(img => {
+            const imgRect = img.getBoundingClientRect();
+            if (imgRect.left < sliderRect.width) { // 如果图片即将进入可视区域，则加载它
+                img.src = img.getAttribute('data-src');
+                img.removeAttribute('data-src');
+                img.onload = () => img.style.opacity = 1; // 图片加载完成后显示
+            }
+        });
+    }
 
-        function endDrag() {
-            isDown = false;
-        }
+    function handleDragStart(e) {
+        isDown = true;
+        startX = e.pageX || e.touches[0].pageX - slider.offsetLeft;
+        scrollLeft = slider.scrollLeft;
+        slider.classList.add('active');
+    }
 
-        function moveDrag(e) {
-            if (!isDown) return;
-            e.preventDefault();
-            const x = e.pageX || e.touches[0].pageX - slider.offsetLeft;
-            const walk = (x - startX); // 减少乘数以使滑动更平滑
-            slider.scrollLeft = scrollLeft - walk;
-        }
+    function handleDragEnd() {
+        isDown = false;
+        slider.classList.remove('active');
+    }
 
-        slider.addEventListener('mousedown', startDrag);
-        slider.addEventListener('mouseleave', endDrag);
-        slider.addEventListener('mouseup', endDrag);
-        slider.addEventListener('mousemove', moveDrag);
+    function handleDragMove(e) {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX || e.touches[0].pageX - slider.offsetLeft;
+        const walk = (x - startX); 
+        slider.scrollLeft = scrollLeft - walk;
+    }
 
-        // 添加触摸事件支持
-        slider.addEventListener('touchstart', startDrag);
-        slider.addEventListener('touchend', endDrag);
-        slider.addEventListener('touchmove', moveDrag);
-    });
+    // 初始化图片加载
+    loadImages();
+    // 监听滚动事件以懒加载图片
+    slider.addEventListener('scroll', loadImages);
+
+    // 绑定事件处理程序
+    ['mousedown', 'touchstart'].forEach(evt => slider.addEventListener(evt, handleDragStart));
+    ['mouseleave', 'mouseup', 'touchend'].forEach(evt => slider.addEventListener(evt, handleDragEnd));
+    ['mousemove', 'touchmove'].forEach(evt => slider.addEventListener(evt, handleDragMove));
+});
 </script>
 </body>
 </html>
-
 
