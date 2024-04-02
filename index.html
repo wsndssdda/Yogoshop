@@ -2,39 +2,34 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>Yogoshop</title>
+    <title>触摸滑动视图</title>
     <style>
         body, html {
             height: 100%;
             margin: 0;
             overflow: hidden;
+            touch-action: none; /* 禁止浏览器的默认触摸行为，如滚动 */
         }
         #viewer {
-            width: 100%;
+            display: flex; /* 使用flex布局以便图片能够水平排列 */
             height: 100%;
-            position: relative;
+            overflow-x: scroll; /* 允许水平滚动 */
+            scroll-snap-type: x mandatory; /* 启用滚动捕捉以确保图片对齐 */
         }
         .image {
-            background-size: cover;
-            background-position: center;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
+            flex: 0 0 auto; /* 防止图片缩放，保持原有尺寸 */
+            width: 100%; /* 宽度和视口一致 */
             height: 100%;
-            display: none;
-            transition: opacity 0.5s ease-in-out; /* 添加平滑过渡效果 */
-        }
-        .image.visible {
-            display: block;
-            opacity: 1;
+            background-size: auto 100%; /* 背景图片高度100%，宽度自动 */
+            background-repeat: no-repeat;
+            scroll-snap-align: start; /* 滚动捕捉对齐 */
         }
     </style>
 </head>
 <body>
 
 <div id="viewer">
-    <div class="image visible" style="background-image: url('image1.jpg');" id="image1"></div>
+    <div class="image" style="background-image: url('image1.jpg');" id="image1"></div>
     <div class="image" style="background-image: url('image2.jpg');" id="image2"></div>
     <div class="image" style="background-image: url('image3.jpg');" id="image3"></div>
     <div class="image" style="background-image: url('image4.jpg');" id="image4"></div>
@@ -42,38 +37,50 @@
 </div>
 
 <script>
-    var currentIndex = 0;
-    var images = document.querySelectorAll('.image');
+    // 获取所有图片和视图容器
     var viewer = document.getElementById('viewer');
 
-    function showImage(index) {
-        images[currentIndex].classList.remove('visible');
-        images[index].classList.add('visible');
-        currentIndex = index;
-    }
+    // 滑动开始时的初始位置
+    let isDown = false;
+    let startX;
+    let scrollLeft;
 
-    function handleMouseMove(e) {
-        var width = viewer.offsetWidth;
-        var mouseX = e.clientX;
-        var index = Math.floor((mouseX / width) * images.length);
-        if (index !== currentIndex) {
-            requestAnimationFrame(function() {
-                showImage(index);
-            });
-        }
-    }
-
-    viewer.addEventListener('mouseenter', function(e) {
-        viewer.addEventListener('mousemove', handleMouseMove);
+    viewer.addEventListener('mousedown', (e) => {
+        isDown = true;
+        startX = e.pageX - viewer.offsetLeft;
+        scrollLeft = viewer.scrollLeft;
+    });
+    viewer.addEventListener('mouseleave', () => {
+        isDown = false;
+    });
+    viewer.addEventListener('mouseup', () => {
+        isDown = false;
+    });
+    viewer.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - viewer.offsetLeft;
+        const walk = (x - startX) * 2; // 滑动距离，*2增加滑动敏感度
+        viewer.scrollLeft = scrollLeft - walk;
     });
 
-    viewer.addEventListener('mouseleave', function(e) {
-        viewer.removeEventListener('mousemove', handleMouseMove);
-        showImage(0); // 当鼠标离开时显示第一张图片
+    // 触摸事件
+    viewer.addEventListener('touchstart', (e) => {
+        isDown = true;
+        startX = e.touches[0].pageX - viewer.offsetLeft;
+        scrollLeft = viewer.scrollLeft;
+    }, { passive: false });
+    viewer.addEventListener('touchend', () => {
+        isDown = false;
     });
+    viewer.addEventListener('touchmove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.touches[0].pageX - viewer.offsetLeft;
+        const walk = (x - startX) * 2; // 滑动距离，*2增加滑动敏感度
+        viewer.scrollLeft = scrollLeft - walk;
+    }, { passive: false });
 
-    // 初始化显示第一张图片
-    showImage(0);
 </script>
 
 </body>
