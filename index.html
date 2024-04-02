@@ -1,81 +1,79 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>触摸滑动视图</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Carousel</title>
     <style>
         body, html {
-            height: 100%;
             margin: 0;
+            padding: 0;
             overflow: hidden;
         }
-        #viewer {
+
+        .slider {
             display: flex;
-            height: 100%;
-            min-width: 100%;
-            overflow: hidden;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            width: 100vw;
+            height: 100vh;
         }
-        .image {
-            min-width: 150%; /* 假设图片宽度为电脑屏幕宽度的1.5倍 */
-            height: 100%;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            transition: transform 0.3s ease-out;
-            position: relative;
+
+        .slider img {
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            scroll-snap-align: start;
         }
     </style>
 </head>
 <body>
 
-<div id="viewer">
-    <div class="image" style="background-image: url('image1.jpg');" id="image1"></div>
-    <div class="image" style="background-image: url('image2.jpg');" id="image2"></div>
-    <div class="image" style="background-image: url('image3.jpg');" id="image3"></div>
-    <div class="image" style="background-image: url('image4.jpg');" id="image4"></div>
-    <div class="image" style="background-image: url('image5.jpg');" id="image5"></div>
+<div class="slider" id="slider">
+    <img src="image1.jpg" alt="Image 1">
+    <img src="image2.jpg" alt="Image 2">
+    <img src="image3.jpg" alt="Image 3">
+    <img src="image4.jpg" alt="Image 4">
+    <img src="image5.jpg" alt="Image 5">
 </div>
 
 <script>
-    const images = document.querySelectorAll('.image');
-    let startX;
-    let moveX;
-    let currentX = 0;
-    let isDragging = false;
+    document.addEventListener('DOMContentLoaded', function() {
+        const slider = document.getElementById('slider');
+        let isDown = false;
+        let startX;
+        let scrollLeft;
 
-    function onTouchStart(e) {
-        isDragging = true;
-        startX = e.touches[0].clientX;
-    }
-
-    function onTouchMove(e) {
-        if (!isDragging) return;
-        moveX = e.touches[0].clientX;
-        const moveDistance = moveX - startX;
-        currentX += moveDistance;
-        e.target.style.transform = `translateX(${currentX}px)`;
-        startX = moveX;
-    }
-
-    function onTouchEnd(e) {
-        isDragging = false;
-        // 当滑动超过一定距离时，自动过渡到下一张或上一张图片
-        const threshold = window.innerWidth / 3; // 滑动阈值
-        if (currentX < -threshold && e.target.nextElementSibling) {
-            currentX -= window.innerWidth;
-            e.target.style.transform = `translateX(${currentX}px)`;
-        } else if (currentX > threshold && e.target.previousElementSibling) {
-            currentX += window.innerWidth;
-            e.target.style.transform = `translateX(${currentX}px)`;
+        function startDrag(e) {
+            isDown = true;
+            startX = e.pageX || e.touches[0].pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
         }
-    }
 
-    images.forEach(image => {
-        image.addEventListener('touchstart', onTouchStart);
-        image.addEventListener('touchmove', onTouchMove);
-        image.addEventListener('touchend', onTouchEnd);
+        function endDrag() {
+            isDown = false;
+        }
+
+        function moveDrag(e) {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX || e.touches[0].pageX - slider.offsetLeft;
+            const walk = (x - startX) * 3; // 使滑动更平滑
+            slider.scrollLeft = scrollLeft - walk;
+        }
+
+        slider.addEventListener('mousedown', startDrag);
+        slider.addEventListener('mouseleave', endDrag);
+        slider.addEventListener('mouseup', endDrag);
+        slider.addEventListener('mousemove', moveDrag);
+
+        // 添加触摸事件支持
+        slider.addEventListener('touchstart', startDrag);
+        slider.addEventListener('touchend', endDrag);
+        slider.addEventListener('touchmove', moveDrag);
     });
 </script>
-
 </body>
 </html>
+
